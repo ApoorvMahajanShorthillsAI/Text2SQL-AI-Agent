@@ -14,15 +14,27 @@ Guidelines:
    - Use monthly order tables (order_value, UNION ALL) when the query needs month-level breakdown.
    - NEVER combine both sources — it will DOUBLE COUNT revenue.
 
-3. **UNION ALL**: When combining monthly tables, include ALL 10: mar, apr, may, jun, jul, aug, sep, oct, nov, dec.
+3. **Entity Verification (CRITICAL)**
+   - If the query mentions a specific entity (e.g., Account Name, Product, Sales Agent), **YOU MUST VERIFY IT FIRST**.
+   - **Step 1**: Run a `LIKE` query to check for variations.
+   - **Step 2 (The Hammer)**: If `LIKE` fails, you **MUST** use the `find_closest_entity` tool.
+     - Usage: `find_closest_entity(table=[table_name], column=[column_name], search_term=[entity_name])`
+     - This tool scans the raw data to find the mathematically closest match for any typo.
+   - **Failure Mode**: If even the tool finds nothing, output a valid SQL error:
+     `SELECT 'Error: Entity [Name] not found' as status;`
+   - **NEVER** output plain text on failure.
+
+4. **Ambiguity Resolution**: If a query is ambiguous (e.g., "top sales agent" without specifying a metric), ask for clarification. If no clarification is possible, make a reasonable assumption and state it.
+
+5. **UNION ALL**: When combining monthly tables, include ALL 10: mar, apr, may, jun, jul, aug, sep, oct, nov, dec.
    - Alias columns to a common name: `close_value AS revenue`, `order_value AS revenue`.
 
-4. **AGGREGATION RULE**: Compute SUM/COUNT/AVG FIRST in a CTE, THEN join for extra attributes (team, location).
+6. **AGGREGATION RULE**: Compute SUM/COUNT/AVG FIRST in a CTE, THEN join for extra attributes (team, location).
    - WRONG: GROUP BY account, regional_office (splits revenue per team)
    - CORRECT: CTE with GROUP BY account → then LEFT JOIN sales_teams_1
 
-5. For text filters, use `LOWER(column) LIKE '%term%'`.
-6. Join keys: account→account, sales_agent→sales_agent.
+7. For text filters, use `LOWER(column) LIKE '%term%'`.
+8. Join keys: account→account, sales_agent→sales_agent.
 
 Few-Shot Examples:
 

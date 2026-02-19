@@ -6,6 +6,7 @@ from google.adk.planners import PlanReActPlanner
 from crm_agent.config import MODEL_NAME
 from crm_agent.db import run_sql_query
 from ..utils import extract_sql_from_text
+from crm_agent_classic.subagents.tools import find_closest_entity
 
 # Load instruction from file
 _instruction_path = os.path.join(os.path.dirname(__file__), "instruction.md")
@@ -40,5 +41,5 @@ sql_generator_agent = SmartSqlArchitectAgent(
     description="Generates high-performance SQLite queries using explicit planning.",
     instruction=_INSTRUCTION,
     planner=PlanReActPlanner(),
-    tools=[run_sql_query],  # Tool-use enabled!
+    tools=[run_sql_query, find_closest_entity],  # Added robust fuzzy tool
 )
